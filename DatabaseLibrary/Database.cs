@@ -8,7 +8,7 @@ namespace DatabaseLibrary
     {
         public int Id { get; set; }
         public int HoursPlayed { get; set; }
-        public DateTime Date { get; set; }
+        public DateTime DatePlayed { get; set; }
     }
     public class Database
     {
@@ -47,6 +47,7 @@ namespace DatabaseLibrary
             string? input = "";
             int hoursPlayed = 0;
 
+            Console.WriteLine("Please enter how long you have played.");
             input = Console.ReadLine();
             while (!int.TryParse(input, out hoursPlayed) || hoursPlayed < 1)
             {
@@ -61,6 +62,7 @@ namespace DatabaseLibrary
             string? input = "";
             string date;
 
+            Console.WriteLine("Please enter the date. Enter in this format 'MM/dd/yyyy'.");
             input = Console.ReadLine();
             while (!DateTime.TryParseExact(input, "MM/dd/yyyy", new CultureInfo("en-US"), DateTimeStyles.None,out _))
             {
@@ -73,10 +75,8 @@ namespace DatabaseLibrary
         public void InsertNewRecord()
         {
             Console.Clear();
-            Console.WriteLine("Please enter how long you have played.");
             int hoursPlayedInput = GetHoursPlayed();
 
-            Console.WriteLine("Please enter the date. Enter in this format 'MM/dd/yyyy'.");
             string dateInput = GetDatePlayed();
 
             Add(hoursPlayedInput, dateInput);
@@ -126,7 +126,7 @@ namespace DatabaseLibrary
                             {
                                 Id = reader.GetInt32(0),
                                 HoursPlayed = reader.GetInt32(1),
-                                Date = DateTime.ParseExact(reader.GetString(2), "MM/dd/yyyy", new CultureInfo("en-US"))
+                                DatePlayed = DateTime.ParseExact(reader.GetString(2), "MM/dd/yyyy", new CultureInfo("en-US"))
                             });
                     }
                 }
@@ -142,7 +142,7 @@ namespace DatabaseLibrary
             Console.WriteLine("ID\t\thours played\t\tdate");
             for (int i = 0; i < dbData.Count; i++)
             {
-                Console.WriteLine($"{dbData[i].Id}\t\t{dbData[i].HoursPlayed}\t\t\t{dbData[i].Date.ToString("MM/dd/yyyy")}");
+                Console.WriteLine($"{dbData[i].Id}\t\t{dbData[i].HoursPlayed}\t\t\t{dbData[i].DatePlayed.ToString("MM/dd/yyyy")}");
                 if (i < dbData.Count - 1)
                 {
                     Console.WriteLine("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -150,7 +150,44 @@ namespace DatabaseLibrary
             }
             Console.WriteLine("-----------------------------------------------------------------");
             Console.ReadKey();
+        }
+
+        private int GetID()
+        {
+            int id = 0;
+            string? choice = "";
+            ReadAllRecords();
+            Console.WriteLine("Type the id of the record you wish to update.");
+            choice = Console.ReadLine();
+            while (!int.TryParse(choice, out id) || (id > dbData.Count || id < 1))
+            {
+                Console.WriteLine("Input is invalid. Please try again.");
+                choice = Console.ReadLine();
+            }
+            return id;
+        }
+        public void UpdateRecord()
+        {
+            int id = GetID();
+            int hoursPlayed = GetHoursPlayed();
+            string date = GetDatePlayed();
+
+            GetConnection();
+
+            using (SQLiteConnection con = new SQLiteConnection(connection))
+            {
+                SQLiteCommand command = new SQLiteCommand();
+                con.Open();
+
+                string query = $@"UPDATE played_videogames SET hours_played = {hoursPlayed}, date = '{date}' WHERE id = {id}";
+                command.CommandText = query;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+
+                con.Close();
+            }
             Console.Clear();
+            Console.WriteLine("Record updated successfully\n");
         }
         public void GetConnection()
         {

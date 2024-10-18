@@ -33,6 +33,7 @@ namespace HabitTrackerProgram
                     case 1:
                         // View all records
                         database.ReadAllRecords();
+                        Console.Clear();
                         break;
                     case 2:
                         // Add new record
@@ -40,6 +41,7 @@ namespace HabitTrackerProgram
                         break;
                     case 3:
                         // Update record
+                        database.UpdateRecord();
                         break;
                     case 4:
                         // Delete record

@@ -166,9 +166,37 @@ namespace DatabaseLibrary
             }
             return id;
         }
+
+        private bool DoesIDExist(int id)
+        {
+            bool recordExists = false;
+
+            for (int i = 0; i < dbData.Count; i++)
+            {
+                if (dbData[i].Id == id)
+                {
+                    recordExists = true;
+                }
+            }
+            if (recordExists)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public void UpdateRecord()
         {
             int id = GetID();
+            if (!DoesIDExist(id))
+            {
+                Console.Clear();
+                Console.WriteLine("Record not found. Please try again.");
+                id = GetID();
+            }
+
             int hoursPlayed = GetHoursPlayed();
             string date = GetDatePlayed();
 
@@ -188,6 +216,35 @@ namespace DatabaseLibrary
             }
             Console.Clear();
             Console.WriteLine("Record updated successfully\n");
+        }
+
+        public void DeleteRecord()
+        {
+
+            int id = GetID();
+            if (!DoesIDExist(id))
+            {
+                Console.Clear();
+                Console.WriteLine("Record not found. Please try again.");
+                id = GetID();
+            }
+            GetConnection();
+
+            using (SQLiteConnection con = new SQLiteConnection(connection))
+            {
+                SQLiteCommand command = new SQLiteCommand();
+                con.Open();
+
+                string query = $@"DELETE FROM played_videogames WHERE id = {id}";
+                command.CommandText = query;
+                command.Connection = con;
+                command.ExecuteNonQuery();
+
+                
+                con.Close();
+            }
+            Console.Clear();
+            Console.WriteLine("Record deleted successfully\n");
         }
         public void GetConnection()
         {

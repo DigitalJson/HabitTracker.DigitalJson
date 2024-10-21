@@ -45,6 +45,7 @@ namespace HabitTrackerProgram
                         break;
                     case 4:
                         // Delete record
+                        database.DeleteRecord();
                         break;
                     case 0:
                         Console.WriteLine("Closing app...");
